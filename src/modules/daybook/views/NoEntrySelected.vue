@@ -4,15 +4,25 @@
   </div>
   
   <!-- Add new Entry -->
-  <Fab/>
+  <Fab 
+    @on-click=" goToNewEntryRoute "
+  />
 
 </template>
 
 <script>
 import { defineAsyncComponent } from '@vue/runtime-core'
+
 export default {
+  
   components:{
     Fab: defineAsyncComponent( () => import('../components/Fab.vue') )
+  },
+
+  methods:{
+    goToNewEntryRoute(){
+      this.$router.push( { name:'entry', params:{ id: 'new' } } )
+    }
   }
 }
 </script>

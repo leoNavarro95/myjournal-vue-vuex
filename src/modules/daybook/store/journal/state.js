@@ -3,7 +3,13 @@
 
 export default () => ({
     isLoading: true,
-    entries: [
+    entries: [],
+})
+
+
+/*
+  entries: 
+  [
       {
           id: '1',//new Date().getTime(),
           date: new Date().toString(),
@@ -22,5 +28,5 @@ export default () => ({
         picture: null,
         text: 'Anim laboris sint Lorem proident do tempor Lorem sunt magna voluptate consectetur labore anim. Lorem duis commodo laborum minim eu duis id in reprehenderit ut magna deserunt anim est. In excepteur officia et occaecat labore. Enim aliqua dolore enim nisi esse magna deserunt quis aute.'
       },
-    ],
-})
+  ]
+*/

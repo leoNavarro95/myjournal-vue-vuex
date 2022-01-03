@@ -4,19 +4,36 @@
 
         <div class="entry-title d-flex justify-content-between p-2">
             
+            <!-- ENTRY DATE -->
             <div>
                 <span class="text-success fs-3 fw-bold"> {{ day }} </span>
                 <span class="mx-1 fs-3"> {{ month }} </span>
                 <span class="mx-2 fs-4 fw-light"> {{ yearDay }} </span>
             </div>
-
+            
             <div>
-                <button class="btn btn-danger mx-2">
+                <!-- DELETE BUTTON -->
+                <button v-if="entry.id"
+                    class="btn btn-danger mx-2"
+                    @click="onDeleteEntry"
+                >
                     Borrar
                     <i class="fa fa-trash-alt"></i>
                 </button>
-                
-                <button class="btn btn-primary">
+
+                <input 
+                    type="file"
+                    @change="onSelectedImage"
+                    ref ="imageSelector"
+                    accept=" image/png, image/jpeg "
+                    v-show="false"
+                >
+
+                <!-- UPLOAD PICTURE -->
+                <button 
+                    class="btn btn-primary"
+                    @click="onSelectImg"
+                    >
                     Subir foto
                     <i class="fa fa-upload"></i>
                 </button>
@@ -31,16 +48,27 @@
             ></textarea>
         </div>
 
+        <!-- IMAGE CARD -->
         <img 
-            src="https://us.123rf.com/450wm/julietphotography/julietphotography1907/julietphotography190700053/128779354-bosque-de-cuento-de-hadas-con-%C3%A1rboles-reflejados-en-agua-rosa.jpg?ver=6" 
+            v-if="entry.picture && !localImage"
+            :src="entry.picture" 
             alt="entry-picture"
             class="img-thumbnail"
         >
+
+        <img 
+            v-if="localImage"
+            :src="localImage" 
+            alt="entry-picture"
+            class="img-thumbnail"
+        >
+
     </template>
 
 
     <Fab
         icon="fa-save"
+        @on-click="saveEntry"
     />
 
 </template>
@@ -48,10 +76,11 @@
 <script>
 
 import { defineAsyncComponent } from '@vue/runtime-core'
+import { mapActions, mapGetters } from 'vuex';
+import Swal from 'sweetalert2';
+
 import getDayMonthYear from '../helpers/getDayMonthYear';
-
-import { mapGetters } from 'vuex';
-
+import uploadImage from '../helpers/uploadImage'
 
 export default {
     
@@ -66,20 +95,109 @@ export default {
     components:{
         Fab: defineAsyncComponent( () => import('../components/Fab.vue') )
     },
+
     data(){
         return {
-            entry: null
+            entry: null,
+            localImage: null, 
+            imgFile: null
         }
     },
+
     methods:{
+        ...mapActions('journal', ['updateEntry', 'createEntry', 'deleteEntry']),
+
         loadEntry(){
-            const userEntry = this.getEntryById( this.id )
-            // console.log( userEntry );
-            
-            // entrada no encontrada en el diario
-            if( !userEntry ) return this.$router.push( { name: 'no-entry' } )
+
+            let userEntry
+
+            if( this.id == 'new' ){
+                userEntry = {
+                    text: '',
+                    date: new Date().getTime()
+                }
+            } else {
+                userEntry = this.getEntryById( this.id )
+                // entrada no encontrada en el diario
+                if( !userEntry ) return this.$router.push( { name: 'no-entry' } )
+            }
 
             this.entry = userEntry
+        },
+
+        async saveEntry(){
+
+            new Swal({
+                title: 'Espere por favor',
+                allowOutsideClick: false
+            })
+
+            Swal.showLoading()
+
+            const pictureUrl = await uploadImage( this.imgFile )
+            this.entry.picture = pictureUrl
+
+            // if there is an id, it is because we want to update an existing entry
+            if( this.entry.id ){
+                // call action to put entry into firebase restAPI database
+                await this.updateEntry( this.entry )
+            } else {
+                // we want to create a new entry
+                // it is needed to make a POST to de restAPI database
+
+                const newId = await this.createEntry( this.entry )
+
+                this.$router.push( { name: 'entry', params: { id: newId } } )
+
+            }
+            this.imgFile = null
+
+            Swal.fire('Guardado', 'Entrada registrada!', 'success')
+        },
+        async onDeleteEntry(){
+
+            const { isConfirmed } = await Swal.fire({
+                title: 'Desea eliminar la entrada?',
+                text: 'Luego de eliminada no se podrá recuperar',
+                showDenyButton: true,
+                confirmButtonText: 'Eliminar'
+            })
+
+            if( isConfirmed ){
+                
+                new Swal({
+                    title: 'Espere por favor',
+                    allowOutsideClick: false
+                })
+
+                Swal.showLoading()
+                
+                await this.deleteEntry( this.id )
+                this.$router.push( {name: 'no-entry'} )
+                
+                Swal.fire('Eliminado exitosamente', '', 'success')
+            }
+        },
+
+        onSelectedImage( event ){
+            // console.log(event.target.files);
+            const file = event.target.files[0]
+
+            if( !file ) {
+                this.localImage = null
+                this.imgFile = null
+                return
+            }
+            // We got an image file
+            this.imgFile = file
+
+            const fr = new FileReader()
+            fr.onload = () => this.localImage = fr.result
+            fr.readAsDataURL( file )
+
+        },
+        onSelectImg(){
+            this.$refs.imageSelector.click()
         }
     },
 
