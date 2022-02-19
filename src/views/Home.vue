@@ -1,18 +1,22 @@
 <template>
     <div class="container text-center mt-3">
       <div class="row">
-        <div class="col-6 col-md-3"> 
-          <h1>Mi diario</h1>
+        <div class="col-6 col-md-8"> 
+          <h1>My journal</h1>
         </div>
-        <div class="col-6 col-md-1"> 
-          <button @click="goToDaybook" class="btn btn-primary">entrar</button>
+        <div class="col-6 col-md-4"> 
+          <button @click="goToDaybook" class="btn btn-primary">enter</button>
         </div>
       </div>
       <hr>
     </div>
 
+  <div class="container">
+    <carousel></carousel>
+  </div>
 
-    
+  <!-- Tarjetas de testimonios -->
+    <!-- 
     <div class="container align-items-center justify-content-center alto-100">
       <h4 class="mb-2 fs-3 lh-2">Testimonios</h4>
       <div class="row">
@@ -107,23 +111,32 @@
       </div>
       
     </div>
-
+ -->
 
     
 </template>
 
 <script>
 import { useRouter } from 'vue-router'
-import TestimonialCard from "../components/TestimonialCard.vue";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.min.js";
+import * as Bootstrap from 'bootstrap'
+
+import Carousel from "../components/Carousel"
+// import TestimonialCard from "../components/TestimonialCard.vue";
 
 export default {
 
   components:{
-    TestimonialCard,
+    Carousel
+    // TestimonialCard,
   },
 
   setup(){
     const router = useRouter()
+
+    var myCarousel = document.querySelector('#carousel')
+    new Bootstrap.Carousel(myCarousel)
 
     return{
       goToDaybook(){
