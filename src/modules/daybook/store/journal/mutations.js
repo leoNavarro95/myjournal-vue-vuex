@@ -8,8 +8,7 @@
 
 export const setEntries = ( state, entries ) => {
 
-    state.entries = [ ...state.entries, ...entries ] //se le anexan a las entries anteriores las nuevas
-
+    state.entries = [ ...entries, ...state.entries ] //se le anexan a las entries anteriores las nuevas
     state.isLoading = false
 }
 
@@ -35,9 +34,10 @@ export const addEntry = ( state, newEntry ) => {
 }
 
 export const deleteEntry = ( state, id ) => {
-
     const index = state.entries.map( e => e.id ).indexOf( id )
-
     state.entries.splice( index, 1 )
+}
 
+export const clearEntries = ( state ) => {
+    state.entries = []
 }

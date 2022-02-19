@@ -25,7 +25,7 @@ export const loadEntries = async ( { commit } ) => {
         })
     }
 
-    commit( 'setEntries', entries)
+    commit( 'setEntries', entries.reverse())
     
 }
 
@@ -35,8 +35,6 @@ export const updateEntry = async ( { commit }, entryToUpdate )  => {
     const dataToSave = {date, text, picture}
     
     const { data } = await journalApi.put( `/entries/${ entryToUpdate.id }.json`,  dataToSave)
-    
-    console.log( data );
     
     commit('updateEntry', { ...entryToUpdate}) //{ ...newEntry} con esto se evita pasar por referencia a newEntry, pues se desectructura al objeto  
 }
